@@ -1,0 +1,6 @@
+*.spec
+*.log
+build
+dist
+.conda
+__pycache__
