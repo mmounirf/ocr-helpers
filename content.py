@@ -197,11 +197,23 @@ def process_local_data():
                 coordinates_file = json_matches.group(6)
                 article_id = coordinates_file.split("_")[1]
 
-                ocr_json_file_obj = open(ocr_json_file, encoding='utf-8')
-                ocr_json_content = json.load(ocr_json_file_obj)
+                try:
+                    ocr_json_file_obj = open(ocr_json_file, encoding='utf-8')
+                    ocr_json_content = json.load(ocr_json_file_obj)      
+                
+                except:
+                    logger.critical(f"OCR JSON file not found {ocr_json_file}. Make sure the file exists, and try again.")
+                    messagebox.showerror(f"OCR JSON file not found!", f"Error opening file {ocr_json_file}.")
 
-                coordinates_json_file_obj = open(coordinates_json_file)
-                coordinates_json_content = json.load(coordinates_json_file_obj)
+
+                try:
+                    coordinates_json_file_obj = open(coordinates_json_file)
+                    coordinates_json_content = json.load(coordinates_json_file_obj)   
+                
+                except:
+                    logger.critical(f"Coordinates JSON file not found {coordinates_json_file}. Make sure the file exists, and try again.")
+                    messagebox.showerror(f"Coordinates JSON file not found!", f"Error opening file {coordinates_json_file}.")
+
 
                 parent_directory = os.path.normpath(os.path.dirname(root))
 
@@ -279,8 +291,16 @@ def process_local_data():
             # Create the directories if they don't exist
                 os.makedirs(os.path.dirname(article_json_file_path), exist_ok=True)
 
-                with open(article_json_file_path, 'w', encoding='utf-8') as file:
-                    json.dump(json_data, file, ensure_ascii=False, indent=2)
+
+                try:
+                    with open(article_json_file_path, 'w', encoding='utf-8') as file:
+                        json.dump(json_data, file, ensure_ascii=False, indent=2)
+                
+                except:
+                    logger.critical(f"Artcile JSON file not found {article_json_file_path}. Make sure the file exists, and try again.")
+                    messagebox.showerror(f"Artcile JSON file not found!", f"Error opening file {article_json_file_path}.")
+
+
 
     logger.yellow(' -------------------- Processing local data completed -------------------- ')
 
@@ -319,15 +339,22 @@ async def process_remote_data():
 
                     file_path = os.path.normpath(os.path.join(parent_directory, 'content', saved_json_file))
     
-                    with open(file_path, 'r+', encoding='utf-8') as file:
-                        file_data = json.load(file)
 
-                        file_data['author'] = list(filter(None, article_data['authors']))
-                        file_data['document_title'] = article_data['title']
-                        file_data['files_info']['post_ocr_text'] = article_data['content']
+                    try:
+                        with open(file_path, 'r+', encoding='utf-8') as file:
+                            file_data = json.load(file)
 
-                        file.seek(0)
-                        json.dump(file_data, file, ensure_ascii=False, indent=2)                  
+                            file_data['author'] = list(filter(None, article_data['authors']))
+                            file_data['document_title'] = article_data['title']
+                            file_data['files_info']['post_ocr_text'] = article_data['content']
+
+                            file.seek(0)
+                            json.dump(file_data, file, ensure_ascii=False, indent=2)        
+                    
+                    except:
+                        logger.critical(f"File not found {file_path}. Check crossponding _coordinates file.")
+                        messagebox.showerror(f"File not found!", f"Error opening file {file_path}. Check crossponding _coordinates file")
+          
             
     logger.yellow(' -------------------- Processing remote data completed -------------------- ')
 
