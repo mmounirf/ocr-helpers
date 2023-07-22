@@ -195,6 +195,7 @@ def process_local_data():
                 issue = issue_day.split("_")[1]
                 page_number = json_matches.group(5)
                 coordinates_file = json_matches.group(6)
+                article_id = coordinates_file.split("_")[1]
 
                 ocr_json_file_obj = open(ocr_json_file, encoding='utf-8')
                 ocr_json_content = json.load(ocr_json_file_obj)
@@ -206,9 +207,7 @@ def process_local_data():
 
                 name_base = f"newspaper_{provider_name}_{provider_name}_{year}_{month}_{issue_day}"
                 page_base_name = f"{name_base}_page_{page_number}"
-                article_base_name = f"{page_base_name}_art{coordinates_json_content['fileId']}"
-
-                
+                article_base_name = f"{page_base_name}_art{article_id}"
 
                 json_data = {
                     "batch_info": {
@@ -273,7 +272,7 @@ def process_local_data():
 
 
 
-                artilce_json_file = f"newspaper_{provider_name}_{provider_name}_{year}_{month}_{issue_day}_page_{page_number}_art{coordinates_json_content['fileId']}.json"
+                artilce_json_file = f"newspaper_{provider_name}_{provider_name}_{year}_{month}_{issue_day}_page_{page_number}_art{article_id}.json"
                 
                 article_json_file_path = os.path.join(parent_directory, 'content', artilce_json_file)
             
