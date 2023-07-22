@@ -85,9 +85,15 @@ def get_coordinates(json_content):
     else:
         return convert_coordinates(json_content["polygon"][0])
     
-def get_response_text(ocr_json_response):
+def get_response_text(ocr_json_response, article_base_name):
+
     if(len(ocr_json_response) > 1):
-        return "\r\n".join(response["fullTextAnnotation"]["text"] for item in ocr_json_response for response in item["responses"])
+        try:
+            return "\r\n".join(response["fullTextAnnotation"]["text"] for item in ocr_json_response for response in item["responses"]) 
+        
+        except:
+            logger.critical(f"Error in OCR JSON file. Check child article {article_base_name} content.")
+            messagebox.showerror(f"Error in OCR JSON file!", f"Check child article {article_base_name} content.")
     else:
         return ocr_json_response['responses'][0]["fullTextAnnotation"]["text"]
     
@@ -159,17 +165,25 @@ def get_lines(response):
     return {"lines": lines}
 
 
-def process_line_coordinates(ocr_json_response):
+def process_line_coordinates(ocr_json_response, article_base_name):
     lines = [];
-    if(len(ocr_json_response) > 1):
-        for item in ocr_json_response:
-            for response in item["responses"]:
-                lines.append(get_lines(response))
-                    
-        return lines
-    else:
-        lines = get_lines(ocr_json_response['responses'][0])
-        return lines
+
+    try:
+        if(len(ocr_json_response) > 1):
+            for item in ocr_json_response:
+                for response in item["responses"]:
+                    lines.append(get_lines(response))
+                        
+            return lines
+        else:
+            lines = get_lines(ocr_json_response['responses'][0])
+            return lines
+    
+    except:
+        logger.critical(f"Error in OCR JSON file. Check child article {article_base_name} content.")
+        messagebox.showerror(f"Error in OCR JSON file!", f"Check child article {article_base_name} content.")
+
+
 
 def process_local_data():
     logger.yellow(' -------------------- Processing local data -------------------- ')
@@ -234,11 +248,11 @@ def process_local_data():
                     "author": [],
                     "files_info": {
                         "pages": [coordinates_json_content['pageId']],
-                        "ocr_text": get_response_text(ocr_json_content),
+                        "ocr_text": get_response_text(ocr_json_content, article_base_name),
                         "post_ocr_text": "",
                         "image_name": f"{article_base_name}.jpg",
                         "article_coordinates": get_coordinates(coordinates_json_content),
-                        "lines": process_line_coordinates(ocr_json_content),
+                        "lines": process_line_coordinates(ocr_json_content, article_base_name),
                         "thumbnail_name": f"{article_base_name}_thumbnail.jpg",
                     },
                     "pages": [{
